@@ -10,4 +10,10 @@
         <Content Update="appsettings.Testing.json" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="FluentMigrator" Version="8.0.1"/>
+        <PackageReference Include="FluentMigrator.Runner" Version="8.0.1"/>
+        <PackageReference Include="FluentMigrator.Runner.SqlServer" Version="8.0.1"/>
+    </ItemGroup>
+
 </Project>
