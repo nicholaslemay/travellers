@@ -1,10 +1,9 @@
 using System.Net;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace TravellersTest;
 
-public class RootEndpointTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class RootEndpointTests(TravellersWebApplicationFactory factory) : IClassFixture<TravellersWebApplicationFactory>
 {
     [Fact]
     public async Task ShouldReturnHelloWorldWhenGettingRoot()
