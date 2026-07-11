@@ -109,6 +109,11 @@ Favor vertical slicing:
 - Prefer a `Students/` folder containing the controller, use cases, repositories, etc. related to students
 - Avoid a `Controllers/` folder with all controllers, a `Services/` folder with all services, etc.
 
+Exception — shared infrastructure that is not owned by a single slice lives under `Support/`:
+
+- Database migrations are colocated in `Support/Db/Migrations/` (the database is shared across slices, so migrations are not vertically sliced)
+- The migration runner lives in `Support/Db/`
+
 # Testing
 
 - Do **not** use mocks. Do not install any mocking library
