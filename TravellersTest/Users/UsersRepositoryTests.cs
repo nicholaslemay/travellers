@@ -1,5 +1,6 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Microsoft.EntityFrameworkCore;
 using Travellers.Users;
 
 namespace TravellersTest.Users;
@@ -21,13 +22,31 @@ public class UsersRepositoryTests(DatabaseMigrationFixture fixture)
 
         var user = repository.CreateUser("traveller@example.com");
 
-        using (new AssertionScope())
-        {
-            user.Id.Value.Should().BePositive();
-            user.Email.Should().Be("traveller@example.com");
-            user.CreatedAt.Should().Be(Now);
-            user.UpdatedAt.Should().Be(Now);
-        }
+        using var _ = new AssertionScope();
+        user.Id.Value.Should().BePositive();
+        user.Email.Should().Be("traveller@example.com");
+        user.CreatedAt.Should().Be(Now);
+        user.UpdatedAt.Should().Be(Now);
+    }
+    
+    [Fact]
+    public void ShouldEnforceUniqueEmail()
+    {
+        var repository = CreateRepository();
+        repository.CreateUser("traveller@example.com");
+        Action createAnotherUser = () => repository.CreateUser("traveller@example.com");
+
+        createAnotherUser.Should().Throw<DbUpdateException>();
+    }
+    
+    [Fact]
+    public void ShouldGenerateDifferentUserIds()
+    {
+        var repository = CreateRepository();
+        var user1 = repository.CreateUser("user1@example.com");
+        var user2 = repository.CreateUser("user2@example.com");
+
+        user1.Id.Should().NotBe(user2.Id);
     }
 
     [Fact]
