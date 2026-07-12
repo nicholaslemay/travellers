@@ -1,6 +1,12 @@
 using Travellers.Support.Db;
+using Travellers.Users;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddTravellersDatabase(builder.Configuration)
+    .AddUsers();
+
 var app = builder.Build();
 
 DatabaseMigrator.Migrate(app.Configuration.GetConnectionString("TravellersDb")!);
