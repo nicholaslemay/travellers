@@ -1,6 +1,5 @@
 using FluentMigrator.Runner;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Travellers.Support.Db;
 

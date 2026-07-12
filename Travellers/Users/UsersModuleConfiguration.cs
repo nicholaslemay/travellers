@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Travellers.Users;
 
 public static class UsersModuleConfiguration
