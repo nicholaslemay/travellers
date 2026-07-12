@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Registry;
@@ -13,8 +12,6 @@ public static class DatabaseServices
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.TryAddSingleton(TimeProvider.System);
-
         services.Configure<DatabaseResilienceOptions>(
             configuration.GetSection("DatabaseResilience"));
 
@@ -22,8 +19,7 @@ public static class DatabaseServices
         {
             var options = context.ServiceProvider
                 .GetRequiredService<IOptions<DatabaseResilienceOptions>>().Value;
-            builder.TimeProvider = context.ServiceProvider.GetRequiredService<TimeProvider>();
-            DatabaseResiliencePipeline.Configure(builder, options);
+            builder.AddTimeout(options.Timeout);
         });
 
         services.AddScoped(serviceProvider => new DatabaseExecutor(
