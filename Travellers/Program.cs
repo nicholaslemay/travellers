@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddTravellersDatabase(builder.Configuration)
-    .AddUsers();
+    .AddUsersModule();
 
 var app = builder.Build();
 
