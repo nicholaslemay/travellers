@@ -1,6 +1,8 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
+using Polly;
+using Travellers.Support.Db;
 using Travellers.Users;
 
 namespace TravellersTest.Users;
@@ -13,7 +15,7 @@ public class UsersRepositoryTests(DatabaseMigrationFixture fixture)
         new(2026, 7, 12, 8, 30, 0, TimeSpan.Zero);
 
     private UsersRepository CreateRepository() =>
-        new(DbContext, new FixedTimeProvider(Now));
+        new(DbContext, new FixedTimeProvider(Now), new DatabaseExecutor(ResiliencePipeline.Empty));
 
     [Fact]
     public void ShouldCreateUserAndReturnFullyBuiltUser()
