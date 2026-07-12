@@ -3,6 +3,7 @@ using FluentAssertions;
 
 namespace TravellersTest;
 
+[Collection("Database")]
 public class RootEndpointTests(TravellersWebApplicationFactory factory) : IClassFixture<TravellersWebApplicationFactory>
 {
     [Fact]

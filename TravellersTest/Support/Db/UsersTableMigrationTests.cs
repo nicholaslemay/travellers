@@ -4,8 +4,8 @@ using Microsoft.Data.SqlClient;
 
 namespace TravellersTest.Support.Db;
 
+[Collection("Database")]
 public class UsersTableMigrationTests(DatabaseMigrationFixture fixture)
-    : IClassFixture<DatabaseMigrationFixture>
 {
     [Fact]
     public void ShouldCreateUsersTableWithIdentityUserId()
