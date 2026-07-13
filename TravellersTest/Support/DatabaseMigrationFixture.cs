@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Travellers.Support.Db;
 
-namespace TravellersTest;
+namespace TravellersTest.Support;
 
 public class DatabaseMigrationFixture
 {

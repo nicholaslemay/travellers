@@ -1,4 +1,4 @@
-namespace TravellersTest;
+namespace TravellersTest.Support;
 
 public sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
 {

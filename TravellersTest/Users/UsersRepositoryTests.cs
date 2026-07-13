@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Polly;
 using Travellers.Support.Db;
 using Travellers.Users;
+using TravellersTest.Support;
 
 namespace TravellersTest.Users;
 

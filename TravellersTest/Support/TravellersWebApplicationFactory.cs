@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace TravellersTest;
+namespace TravellersTest.Support;
 
 public class TravellersWebApplicationFactory : WebApplicationFactory<Program>
 {

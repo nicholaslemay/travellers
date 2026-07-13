@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 using Travellers.Support.Db;
 using Travellers.Users;
+using TravellersTest.Support;
 
 namespace TravellersTest.Users;
 

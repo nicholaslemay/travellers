@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Travellers.Support.Db;
 
-namespace TravellersTest;
+namespace TravellersTest.Support;
 
 public abstract class TransactionalDatabaseTest : IDisposable
 {
