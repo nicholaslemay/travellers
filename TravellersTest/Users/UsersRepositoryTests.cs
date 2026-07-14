@@ -10,7 +10,7 @@ namespace TravellersTest.Users;
 
 [Collection("Database")]
 public class UsersRepositoryTests(DatabaseMigrationFixture fixture)
-    : TransactionalDatabaseTest(fixture)
+    : DatabaseTest(fixture)
 {
     private static readonly DateTimeOffset Now =
         new(2026, 7, 12, 8, 30, 0, TimeSpan.Zero);
