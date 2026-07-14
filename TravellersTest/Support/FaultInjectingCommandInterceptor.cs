@@ -1,14 +1,14 @@
 using System.Data.Common;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace TravellersTest.Users;
+namespace TravellersTest.Support;
 
-public sealed class HangingCommandInterceptor : DbCommandInterceptor
+public sealed class FaultInjectingCommandInterceptor : DbCommandInterceptor
 {
-    private readonly TaskCompletionSource _commandStarted =
-        new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private Action<DbCommand> _behavior = _ => { };
 
-    public Task CommandStarted => _commandStarted.Task;
+    public void Hang() => _behavior = command =>
+        command.CommandText = "WAITFOR DELAY '00:10:00';" + command.CommandText;
 
     public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(
         DbCommand command,
@@ -16,8 +16,7 @@ public sealed class HangingCommandInterceptor : DbCommandInterceptor
         InterceptionResult<DbDataReader> result,
         CancellationToken cancellationToken = default)
     {
-        command.CommandText = "WAITFOR DELAY '00:10:00';" + command.CommandText;
-        _commandStarted.TrySetResult();
+        _behavior(command);
 
         return base.ReaderExecutingAsync(command, eventData, result, cancellationToken);
     }

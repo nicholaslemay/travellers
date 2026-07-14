@@ -1,6 +1,4 @@
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Travellers.Support.Db;
 using Travellers.Users;
@@ -14,15 +12,13 @@ public class DatabaseTimeoutTests(DatabaseMigrationFixture fixture) : DatabaseTe
     [Fact(Timeout = 5000)]
     public async Task ShouldTimeOutWhenDatabaseCallExceedsConfiguredTimeout()
     {
-        var interceptor = new HangingCommandInterceptor();
-        OverrideServices(services => services.AddSingleton<IInterceptor>(interceptor));
+        SetupDatabaseToHang();
 
         var repository = GetService<IUserRepository>();
         var configuredTimeout = GetService<IOptions<DatabaseResilienceOptions>>().Value.Timeout;
 
         var call = repository.GetByIdAsync(new UserId(1));
 
-        await interceptor.CommandStarted.ConfigureAwait(true);
         FakeTime.Advance(configuredTimeout + TimeSpan.FromTicks(1));
 
         var completingTheCall = async () => await call.ConfigureAwait(true);

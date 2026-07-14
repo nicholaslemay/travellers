@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -17,6 +18,8 @@ public abstract class DatabaseTest : IAsyncLifetime
     private IServiceScope? _scope;
     private IDbContextTransaction? _transaction;
 
+    private readonly FaultInjectingCommandInterceptor _interceptor = new();
+
     protected FakeTimeProvider FakeTime { get; } = new();
 
     protected DatabaseTest(DatabaseMigrationFixture fixture)
@@ -28,6 +31,8 @@ public abstract class DatabaseTest : IAsyncLifetime
 
     protected void OverrideServices(Action<IServiceCollection> configure) =>
         _serviceOverrides.Add(configure);
+
+    protected void SetupDatabaseToHang() => _interceptor.Hang();
 
     protected TravellersDbContext DbContext => GetService<TravellersDbContext>();
 
@@ -43,6 +48,7 @@ public abstract class DatabaseTest : IAsyncLifetime
             {
                 services.RemoveAll<TimeProvider>();
                 services.AddSingleton<TimeProvider>(FakeTime);
+                services.AddSingleton<IInterceptor>(_interceptor);
 
                 foreach (var configure in _serviceOverrides) configure(services);
             }));
