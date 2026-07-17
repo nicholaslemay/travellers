@@ -3,39 +3,30 @@ using Travellers.Support.Db;
 
 namespace Travellers.Users;
 
-public class UsersRepository(
-    TravellersDbContext dbContext,
-    TimeProvider timeProvider,
-    DatabaseExecutor database) : IUserRepository
+public class UsersRepository(TimeProvider timeProvider, DatabaseExecutor database) : IUserRepository
 {
-    public User CreateUser(string email)
-    {
-        var timestamp = timeProvider.GetUtcNow();
-
-        var row = new UserRow
+    public Task<User> CreateUserAsync(string email, CancellationToken cancellationToken = default) =>
+        database.ExecuteAsync(async (context, token) =>
         {
-            Email = email,
-            CreatedAt = timestamp,
-            UpdatedAt = timestamp
-        };
+            var timestamp = timeProvider.GetUtcNow();
 
-        dbContext.Set<UserRow>().Add(row);
-        dbContext.SaveChanges();
+            var row = new UserRow
+            {
+                Email = email,
+                CreatedAt = timestamp,
+                UpdatedAt = timestamp
+            };
 
-        return BuildUserFrom(row);
-    }
+            context.Set<UserRow>().Add(row);
+            await context.SaveChangesAsync(token).ConfigureAwait(false);
 
-    public User? GetById(UserId id)
-    {
-        var row = dbContext.Set<UserRow>().Find(id.Value);
-
-        return row is null ? null : BuildUserFrom(row);
-    }
+            return BuildUserFrom(row);
+        }, cancellationToken);
 
     public Task<User?> GetByIdAsync(UserId id, CancellationToken cancellationToken = default) =>
-        database.ExecuteAsync(async token =>
+        database.ExecuteAsync(async (context, token) =>
         {
-            var row = await dbContext.Set<UserRow>()
+            var row = await context.Set<UserRow>()
                 .FirstOrDefaultAsync(user => user.UserId == id.Value, token)
                 .ConfigureAwait(false);
 

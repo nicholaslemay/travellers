@@ -22,14 +22,15 @@ public static class DatabaseServices
             builder.AddTimeout(options.Timeout);
         });
 
-        services.AddScoped(serviceProvider => new DatabaseExecutor(
-            serviceProvider.GetRequiredService<ResiliencePipelineProvider<string>>()
-                .GetPipeline("database")));
-
         services.AddDbContext<TravellersDbContext>((serviceProvider, options) =>
             options
                 .UseSqlServer(configuration.GetConnectionString("TravellersDb"))
                 .AddInterceptors(serviceProvider.GetServices<IInterceptor>()));
+
+        services.AddScoped(serviceProvider => new DatabaseExecutor(
+            serviceProvider.GetRequiredService<TravellersDbContext>(),
+            serviceProvider.GetRequiredService<ResiliencePipelineProvider<string>>()
+                .GetPipeline("database")));
 
         return services;
     }

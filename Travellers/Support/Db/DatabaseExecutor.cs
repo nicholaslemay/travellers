@@ -4,10 +4,10 @@ using Polly.Timeout;
 
 namespace Travellers.Support.Db;
 
-public class DatabaseExecutor(ResiliencePipeline pipeline)
+public class DatabaseExecutor(TravellersDbContext dbContext, ResiliencePipeline pipeline)
 {
     public async Task<T> ExecuteAsync<T>(
-        Func<CancellationToken, Task<T>> operation,
+        Func<TravellersDbContext, CancellationToken, Task<T>> operation,
         CancellationToken cancellationToken = default)
     {
         try
@@ -22,13 +22,13 @@ public class DatabaseExecutor(ResiliencePipeline pipeline)
         }
     }
 
-    private static async Task<T> ExecuteHonouringCancellation<T>(
-        Func<CancellationToken, Task<T>> operation,
+    private async Task<T> ExecuteHonouringCancellation<T>(
+        Func<TravellersDbContext, CancellationToken, Task<T>> operation,
         CancellationToken cancellationToken)
     {
         try
         {
-            return await operation(cancellationToken).ConfigureAwait(false);
+            return await operation(dbContext, cancellationToken).ConfigureAwait(false);
         }
         catch (SqlException) when (cancellationToken.IsCancellationRequested)
         {

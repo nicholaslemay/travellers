@@ -20,4 +20,15 @@ public sealed class FaultInjectingCommandInterceptor : DbCommandInterceptor
 
         return base.ReaderExecutingAsync(command, eventData, result, cancellationToken);
     }
+
+    public override ValueTask<InterceptionResult<int>> NonQueryExecutingAsync(
+        DbCommand command,
+        CommandEventData eventData,
+        InterceptionResult<int> result,
+        CancellationToken cancellationToken = default)
+    {
+        _behavior(command);
+
+        return base.NonQueryExecutingAsync(command, eventData, result, cancellationToken);
+    }
 }
