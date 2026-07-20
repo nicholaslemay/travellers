@@ -19,14 +19,13 @@ public abstract class DatabaseTest : IAsyncLifetime
     private IDbContextTransaction? _transaction;
 
     private readonly FaultInjectingCommandInterceptor _interceptor = new();
+    private readonly DatabaseMigrationFixture _fixture;
 
     protected FakeTimeProvider FakeTime { get; } = new();
 
     protected DatabaseTest(DatabaseMigrationFixture fixture)
     {
-        // Unused, but required so xUnit resolves the "Database" collection fixture
-        // (and therefore runs migrations) before this test executes.
-        _ = fixture;
+        _fixture = fixture;
     }
 
     protected void OverrideServices(Action<IServiceCollection> configure) =>
@@ -39,24 +38,38 @@ public abstract class DatabaseTest : IAsyncLifetime
     protected T GetService<T>() where T : notnull =>
         EnsureScope().ServiceProvider.GetRequiredService<T>();
 
+    protected HttpClient CreateHttpClient()
+    {
+        EnsureScope();
+
+        return _factory!.CreateClient();
+    }
+
     private IServiceScope EnsureScope()
     {
         if (_scope is not null) return _scope;
+
+        var dbContext = new TravellersDbContext(new DbContextOptionsBuilder<TravellersDbContext>()
+            .UseSqlServer(_fixture.ConnectionString)
+            .AddInterceptors(_interceptor)
+            .Options);
+
+        _transaction = dbContext.Database.BeginTransaction();
 
         _factory = new TravellersWebApplicationFactory().WithWebHostBuilder(builder =>
             builder.ConfigureTestServices(services =>
             {
                 services.RemoveAll<TimeProvider>();
                 services.AddSingleton<TimeProvider>(FakeTime);
-                services.AddSingleton<IInterceptor>(_interceptor);
+
+                services.RemoveAll<DbContextOptions<TravellersDbContext>>();
+                services.RemoveAll<TravellersDbContext>();
+                services.AddSingleton(dbContext);
 
                 foreach (var configure in _serviceOverrides) configure(services);
             }));
 
         _scope = _factory.Services.CreateScope();
-        _transaction = _scope.ServiceProvider
-            .GetRequiredService<TravellersDbContext>()
-            .Database.BeginTransaction();
 
         return _scope;
     }
