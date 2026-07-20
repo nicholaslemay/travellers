@@ -19,9 +19,17 @@ public static class CreateUserEndpoint
                 return Results.ValidationProblem(new Dictionary<string, string[]>(validation.Errors));
             }
 
-            var user = await useCase.ExecuteAsync(request.Email, cancellationToken);
+            var result = await useCase.ExecuteAsync(request.Email, cancellationToken);
 
-            return Results.Created($"/users/{user.Id.Value}", user);
+            if (result.EmailWasAlreadyTaken)
+            {
+                return Results.Problem(
+                    statusCode: StatusCodes.Status409Conflict,
+                    title: "Email already exists",
+                    detail: $"A user with email '{request.Email}' already exists.");
+            }
+
+            return Results.Created($"/users/{result.User!.Id.Value}", result.User);
         });
 
         return app;

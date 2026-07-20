@@ -4,6 +4,19 @@ namespace Travellers.Users.Create;
 
 public class CreateUserUseCase(IUserRepository repository)
 {
-    public Task<User> ExecuteAsync(string email, CancellationToken cancellationToken = default) =>
-        repository.CreateUserAsync(email, cancellationToken);
+    public async Task<CreateUserResult> ExecuteAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var emailAlreadyExists = await repository
+            .ExistsByEmailAsync(email, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (emailAlreadyExists)
+        {
+            return CreateUserResult.EmailAlreadyExists();
+        }
+
+        var user = await repository.CreateUserAsync(email, cancellationToken).ConfigureAwait(false);
+
+        return CreateUserResult.Created(user);
+    }
 }

@@ -71,4 +71,25 @@ public class UsersRepositoryTests(DatabaseMigrationFixture fixture)
 
         found.Should().BeNull();
     }
+
+    [Fact]
+    public async Task ShouldReportEmailExistsAfterUserIsCreated()
+    {
+        var repository = CreateRepository();
+        await repository.CreateUserAsync("traveller@example.com");
+
+        var exists = await repository.ExistsByEmailAsync("traveller@example.com");
+
+        exists.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldReportEmailDoesNotExistWhenNoUserHasIt()
+    {
+        var repository = CreateRepository();
+
+        var exists = await repository.ExistsByEmailAsync("nobody@example.com");
+
+        exists.Should().BeFalse();
+    }
 }

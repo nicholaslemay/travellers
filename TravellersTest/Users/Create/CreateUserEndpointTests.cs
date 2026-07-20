@@ -65,4 +65,19 @@ public class CreateUserEndpointTests(DatabaseMigrationFixture fixture) : Databas
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task ShouldReturnConflictWhenEmailAlreadyExists()
+    {
+        var client = CreateHttpClient();
+        await client.PostAsJsonAsync("/users", new CreateUserRequest("traveller@example.com"));
+
+        var response = await client.PostAsJsonAsync("/users", new CreateUserRequest("traveller@example.com"));
+
+        using var _ = new AssertionScope();
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("traveller@example.com");
+    }
 }

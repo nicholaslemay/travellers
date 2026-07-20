@@ -33,6 +33,10 @@ public class UsersRepository(TimeProvider timeProvider, DatabaseExecutor databas
             return row is null ? null : BuildUserFrom(row);
         }, cancellationToken);
 
+    public Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default) =>
+        database.ExecuteAsync((context, token) =>
+            context.Set<UserRow>().AnyAsync(user => user.Email == email, token), cancellationToken);
+
     private static User BuildUserFrom(UserRow row) =>
         new(new UserId(row.UserId), row.Email, row.CreatedAt, row.UpdatedAt);
 }
