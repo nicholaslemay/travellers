@@ -1,5 +1,6 @@
 using Travellers.Support.Db;
 using Travellers.Users;
+using Travellers.Users.Create;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,7 @@ var app = builder.Build();
 DatabaseMigrator.Migrate(app.Configuration.GetConnectionString("TravellersDb")!);
 
 app.MapGet("/", () => "Hello World!");
-app.MapUsersEndpoints();
+app.MapCreateUserEndpoint();
 
 app.Run();
 

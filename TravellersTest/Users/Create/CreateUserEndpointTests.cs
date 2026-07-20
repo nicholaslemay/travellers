@@ -4,9 +4,10 @@ using System.Text.Json;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Travellers.Users;
+using Travellers.Users.Create;
 using TravellersTest.Support;
 
-namespace TravellersTest.Users;
+namespace TravellersTest.Users.Create;
 
 [Collection("Database")]
 public class CreateUserEndpointTests(DatabaseMigrationFixture fixture) : DatabaseTest(fixture)

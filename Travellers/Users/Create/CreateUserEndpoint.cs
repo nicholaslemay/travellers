@@ -1,10 +1,10 @@
 using Travellers.Support.Validation;
 
-namespace Travellers.Users;
+namespace Travellers.Users.Create;
 
-public static class UsersEndpoints
+public static class CreateUserEndpoint
 {
-    public static IEndpointRouteBuilder MapUsersEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapCreateUserEndpoint(this IEndpointRouteBuilder app)
     {
         app.MapPost("/users", async (
             CreateUserRequest request,

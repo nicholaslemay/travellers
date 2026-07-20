@@ -1,5 +1,6 @@
 using FluentValidation;
 using Travellers.Support.Validation;
+using Travellers.Users.Create;
 
 namespace Travellers.Users;
 

@@ -1,4 +1,6 @@
-namespace Travellers.Users;
+using Travellers.Users;
+
+namespace Travellers.Users.Create;
 
 public class CreateUserUseCase(IUserRepository repository)
 {

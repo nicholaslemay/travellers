@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Travellers.Users;
+namespace Travellers.Users.Create;
 
 public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
 {
