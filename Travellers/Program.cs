@@ -12,6 +12,7 @@ var app = builder.Build();
 DatabaseMigrator.Migrate(app.Configuration.GetConnectionString("TravellersDb")!);
 
 app.MapGet("/", () => "Hello World!");
+app.MapUsersEndpoints();
 
 app.Run();
 
