@@ -10,7 +10,7 @@ builder.Services
     .AddTravellersDatabase(builder.Configuration)
     .AddTravellersRateLimiting(builder.Configuration)
     .AddUsersModule()
-    .AddHotelReservationsModule();
+    .AddHotelReservationsModule(builder.Configuration);
 
 var app = builder.Build();
 

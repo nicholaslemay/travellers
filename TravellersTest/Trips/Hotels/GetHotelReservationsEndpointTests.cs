@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Travellers.Trips;
 using Travellers.Trips.Hotels;
 using TravellersTest.Support;
@@ -10,9 +12,21 @@ using TravellersTest.Support;
 namespace TravellersTest.Trips.Hotels;
 
 [Collection("Database")]
-public class GetHotelReservationsEndpointTests(DatabaseMigrationFixture fixture) : DatabaseTest(fixture)
+public class GetHotelReservationsEndpointTests : DatabaseTest, IDisposable
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly HotelHubFakeServer _fakeServer = new();
+
+    public GetHotelReservationsEndpointTests(DatabaseMigrationFixture fixture) : base(fixture)
+    {
+        OverrideServices(services =>
+        {
+            services.RemoveAll<IHotelHubClient>();
+            services.AddSingleton<IHotelHubClient>(new HotelHubClient(_fakeServer.CreateClient()));
+        });
+    }
+
+    public void Dispose() => _fakeServer.Dispose();
 
     [Fact]
     public async Task ShouldReturn200WithHotelReservations()
