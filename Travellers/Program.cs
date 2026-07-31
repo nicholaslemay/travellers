@@ -9,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddTravellersDatabase(builder.Configuration)
     .AddTravellersRateLimiting(builder.Configuration)
-    .AddUsersModule();
+    .AddUsersModule()
+    .AddScoped<GetHotelReservationsForTripUseCase>();
 
 var app = builder.Build();
 

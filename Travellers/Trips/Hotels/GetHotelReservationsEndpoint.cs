@@ -4,18 +4,14 @@ public static class GetHotelReservationsEndpoint
 {
     public static IEndpointRouteBuilder MapGetHotelReservationsEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/trips/{tripId}/reservations/hotels", (Guid tripId) =>
-            Results.Ok(new GetHotelReservationsResponse(
-                TripId: tripId,
-                Hotels:
-                [
-                    new HotelReservationResponse(
-                        HotelName: "Le Méridien Paris",
-                        CheckIn: new DateOnly(2026, 8, 15),
-                        CheckOut: new DateOnly(2026, 8, 18)
-                    )
-                ]
-            )));
+        app.MapGet("/trips/{tripId}/reservations/hotels", async (
+            Guid tripId,
+            GetHotelReservationsForTripUseCase useCase,
+            CancellationToken ct) =>
+        {
+            var hotels = await useCase.ExecuteAsync(tripId, ct);
+            return Results.Ok(new GetHotelReservationsResponse(TripId: tripId, Hotels: hotels));
+        });
 
         return app;
     }
