@@ -20,6 +20,9 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Travellers\Travellers.csproj"/>
+        <ProjectReference Include="..\Travellers.HotelHubFake\Travellers.HotelHubFake.csproj">
+            <Aliases>HotelHubFake</Aliases>
+        </ProjectReference>
     </ItemGroup>
 
     <ItemGroup>
