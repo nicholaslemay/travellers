@@ -1,18 +1,18 @@
 namespace Travellers.Trips.Hotels;
 
-public class GetHotelReservationsForTripUseCase
+public class GetHotelReservationsForTripUseCase(
+    ITripHotelReservationsRepository repository,
+    IHotelHubClient hotelHubClient)
 {
-    public Task<IReadOnlyList<HotelReservationResponse>> ExecuteAsync(Guid tripId, CancellationToken ct)
+    public async Task<IReadOnlyList<HotelReservationResponse>> ExecuteAsync(Guid tripId, CancellationToken ct)
     {
-        IReadOnlyList<HotelReservationResponse> reservations =
-        [
-            new HotelReservationResponse(
-                HotelName: "Le Méridien Paris",
-                CheckIn: new DateOnly(2026, 8, 15),
-                CheckOut: new DateOnly(2026, 8, 18)
-            )
-        ];
+        var hubReservationIds = await repository.GetHubReservationIdsAsync(tripId, ct);
 
-        return Task.FromResult(reservations);
+        var reservations = await Task.WhenAll(
+            hubReservationIds.Select(id => hotelHubClient.GetReservationAsync(id, ct)));
+
+        return reservations
+            .Select(r => new HotelReservationResponse(r.HotelName, r.CheckIn, r.CheckOut))
+            .ToList();
     }
 }

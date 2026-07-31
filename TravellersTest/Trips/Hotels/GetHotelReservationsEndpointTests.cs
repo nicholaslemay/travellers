@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Travellers.Trips;
 using Travellers.Trips.Hotels;
 using TravellersTest.Support;
 
@@ -17,9 +18,20 @@ public class GetHotelReservationsEndpointTests(DatabaseMigrationFixture fixture)
     public async Task ShouldReturn200WithHotelReservations()
     {
         var tripId = Guid.NewGuid();
-        var client = CreateHttpClient();
+        var now = DateTimeOffset.UtcNow;
 
-        var response = await client.GetAsync($"/trips/{tripId}/reservations/hotels");
+        DbContext.Set<TripRow>().Add(new TripRow { TripId = tripId, CreatedAt = now, UpdatedAt = now });
+        DbContext.Set<TripHotelReservationRow>().Add(new TripHotelReservationRow
+        {
+            TripHotelReservationId = Guid.NewGuid(),
+            TripId = tripId,
+            HubReservationId = "HB-2026-001234",
+            CreatedAt = now,
+            UpdatedAt = now
+        });
+        await DbContext.SaveChangesAsync();
+
+        var response = await CreateHttpClient().GetAsync($"/trips/{tripId}/reservations/hotels");
         var body = await response.Content.ReadFromJsonAsync<GetHotelReservationsResponse>(JsonOptions);
 
         using var _ = new AssertionScope();
