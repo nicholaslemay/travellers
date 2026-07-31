@@ -1,5 +1,6 @@
 using Travellers.Support.Db;
 using Travellers.Support.RateLimiting;
+using Travellers.Trips.Hotels;
 using Travellers.Users;
 using Travellers.Users.Create;
 
@@ -18,6 +19,7 @@ DatabaseMigrator.Migrate(app.Configuration.GetConnectionString("TravellersDb")!)
 
 app.MapGet("/", () => "Hello World!");
 app.MapCreateUserEndpoint();
+app.MapGetHotelReservationsEndpoint();
 
 app.Run();
 
