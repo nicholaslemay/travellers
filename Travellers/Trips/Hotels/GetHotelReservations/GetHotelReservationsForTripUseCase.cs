@@ -1,18 +1,27 @@
+using OneOf;
+using Travellers.Support;
+
 namespace Travellers.Trips.Hotels.GetHotelReservations;
 
 public class GetHotelReservationsForTripUseCase(
-    ITripHotelReservationsRepository repository,
+    ITripRepository repository,
     IHotelHubClient hotelHubClient)
 {
-    public async Task<IReadOnlyList<HotelReservationResponse>> ExecuteAsync(Guid tripId, CancellationToken ct)
+    public async Task<OneOf<List<HotelReservation>, NotFound>> ExecuteAsync(TripId tripId, CancellationToken ct)
     {
-        var hubReservationIds = await repository.GetHubReservationIdsAsync(tripId, ct);
+        var result = await repository.GetTripAsync(tripId, ct);
 
+        return await result.Match<Task<OneOf<List<HotelReservation>, NotFound>>>(
+            async trip => await FetchReservationsAsync(trip, ct),
+            notFound => Task.FromResult<OneOf<List<HotelReservation>, NotFound>>(notFound)
+        );
+    }
+
+    private async Task<List<HotelReservation>> FetchReservationsAsync(Trip trip, CancellationToken ct)
+    {
         var reservations = await Task.WhenAll(
-            hubReservationIds.Select(id => hotelHubClient.GetReservationAsync(id, ct)));
+            trip.HotelReservations.Select(r => hotelHubClient.GetReservationAsync(r.HubReservationId, ct)));
 
-        return reservations
-            .Select(r => new HotelReservationResponse(r.HotelName, r.CheckIn, r.CheckOut))
-            .ToList();
+        return reservations.ToList();
     }
 }

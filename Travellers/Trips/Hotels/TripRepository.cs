@@ -1,26 +1,35 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using OneOf;
+using Travellers.Support;
 using Travellers.Support.Db;
 
 namespace Travellers.Trips.Hotels;
 
-public interface ITripHotelReservationsRepository
+public interface ITripRepository
 {
-    Task<IReadOnlyList<string>> GetHubReservationIdsAsync(Guid tripId, CancellationToken ct);
+    Task<OneOf<Trip, NotFound>> GetTripAsync(TripId tripId, CancellationToken ct);
 }
 
-public class TripHotelReservationsRepository(DatabaseExecutor database) : ITripHotelReservationsRepository
+public class TripRepository(DatabaseExecutor database) : ITripRepository
 {
-    public Task<IReadOnlyList<string>> GetHubReservationIdsAsync(Guid tripId, CancellationToken ct) =>
-        database.ExecuteAsync(async (context, token) =>
+    public Task<OneOf<Trip, NotFound>> GetTripAsync(TripId tripId, CancellationToken ct) =>
+        database.ExecuteAsync<OneOf<Trip, NotFound>>(async (context, token) =>
         {
-            var ids = await context.Set<TripHotelReservationRow>()
-                .Where(r => r.TripId == tripId)
-                .Select(r => r.HubReservationId)
+            var exists = await context.Set<TripRow>()
+                .AnyAsync(t => t.TripId == tripId.Value, token)
+                .ConfigureAwait(false);
+
+            if (!exists)
+                return new NotFound();
+
+            var hotelReservations = await context.Set<TripHotelReservationRow>()
+                .Where(r => r.TripId == tripId.Value)
+                .Select(r => new TripHotelReservation(r.HubReservationId))
                 .ToListAsync(token)
                 .ConfigureAwait(false);
 
-            return (IReadOnlyList<string>)ids;
+            return new Trip(tripId, hotelReservations);
         }, ct);
 }
 
@@ -32,6 +41,7 @@ public class TripHotelReservationRow
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 }
+
 public class TripHotelReservationRowConfiguration : IEntityTypeConfiguration<TripHotelReservationRow>
 {
     public void Configure(EntityTypeBuilder<TripHotelReservationRow> builder)

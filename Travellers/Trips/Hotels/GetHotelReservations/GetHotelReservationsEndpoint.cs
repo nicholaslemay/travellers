@@ -1,3 +1,6 @@
+using OneOf;
+using Travellers.Support;
+
 namespace Travellers.Trips.Hotels.GetHotelReservations;
 
 public static class GetHotelReservationsEndpoint
@@ -9,8 +12,14 @@ public static class GetHotelReservationsEndpoint
             GetHotelReservationsForTripUseCase useCase,
             CancellationToken ct) =>
         {
-            var hotels = await useCase.ExecuteAsync(tripId, ct);
-            return Results.Ok(new GetHotelReservationsResponse(TripId: tripId, Hotels: hotels));
+            var result = await useCase.ExecuteAsync(new TripId(tripId), ct);
+
+            return result.Match(
+                hotels => Results.Ok(new GetHotelReservationsResponse(tripId, hotels
+                    .Select(h => new HotelReservationResponse(h.HotelName, h.CheckIn, h.CheckOut))
+                    .ToList())),
+                _ => Results.NotFound()
+            );
         });
 
         return app;

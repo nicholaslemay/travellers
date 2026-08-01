@@ -10,7 +10,7 @@ public static class HotelReservationsModuleConfiguration
             client.BaseAddress = new Uri(config["HotelHub:BaseUrl"]!));
 
         return services
-            .AddScoped<ITripHotelReservationsRepository, TripHotelReservationsRepository>()
+            .AddScoped<ITripRepository, TripRepository>()
             .AddScoped<GetHotelReservationsForTripUseCase>();
     }
 }

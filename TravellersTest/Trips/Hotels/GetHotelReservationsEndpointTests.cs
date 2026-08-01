@@ -24,6 +24,14 @@ public class GetHotelReservationsEndpointTests : DatabaseTest, IDisposable
     public void Dispose() => _fakeServer.Dispose();
 
     [Fact]
+    public async Task ShouldReturn404WhenTripDoesNotExist()
+    {
+        var response = await CreateHttpClient().GetAsync($"/trips/{Guid.NewGuid()}/reservations/hotels");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task ShouldReturn200WithHotelReservations()
     {
         var tripId = Guid.NewGuid();
