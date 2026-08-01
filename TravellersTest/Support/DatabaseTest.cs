@@ -14,6 +14,7 @@ namespace TravellersTest.Support;
 public abstract class DatabaseTest : IAsyncLifetime
 {
     private readonly List<Action<IServiceCollection>> _serviceOverrides = [];
+    private readonly List<(string Key, string Value)> _configurationOverrides = [];
     private WebApplicationFactory<Program>? _factory;
     private IServiceScope? _scope;
     private IDbContextTransaction? _transaction;
@@ -30,6 +31,9 @@ public abstract class DatabaseTest : IAsyncLifetime
 
     protected void OverrideServices(Action<IServiceCollection> configure) =>
         _serviceOverrides.Add(configure);
+
+    protected void OverrideConfiguration(string key, string value) =>
+        _configurationOverrides.Add((key, value));
 
     protected void SetupDatabaseToHang() => _interceptor.Hang();
 
@@ -57,6 +61,10 @@ public abstract class DatabaseTest : IAsyncLifetime
         _transaction = dbContext.Database.BeginTransaction();
 
         _factory = new TravellersWebApplicationFactory().WithWebHostBuilder(builder =>
+        {
+            foreach (var (key, value) in _configurationOverrides)
+                builder.UseSetting(key, value);
+
             builder.ConfigureTestServices(services =>
             {
                 services.RemoveAll<TimeProvider>();
@@ -67,7 +75,8 @@ public abstract class DatabaseTest : IAsyncLifetime
                 services.AddSingleton(dbContext);
 
                 foreach (var configure in _serviceOverrides) configure(services);
-            }));
+            });
+        });
 
         _scope = _factory.Services.CreateScope();
 

@@ -3,8 +3,6 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Travellers.Trips;
 using Travellers.Trips.Hotels;
 using TravellersTest.Support;
@@ -19,11 +17,7 @@ public class GetHotelReservationsEndpointTests : DatabaseTest, IDisposable
 
     public GetHotelReservationsEndpointTests(DatabaseMigrationFixture fixture) : base(fixture)
     {
-        OverrideServices(services =>
-        {
-            services.RemoveAll<IHotelHubClient>();
-            services.AddSingleton<IHotelHubClient>(new HotelHubClient(_fakeServer.CreateClient()));
-        });
+        OverrideConfiguration("HotelHub:BaseUrl", _fakeServer.BaseUrl);
     }
 
     public void Dispose() => _fakeServer.Dispose();
