@@ -1,4 +1,4 @@
-namespace Travellers.Trips.Hotels;
+namespace Travellers.Trips.Hotels.GetHotelReservations;
 
 public static class GetHotelReservationsEndpoint
 {

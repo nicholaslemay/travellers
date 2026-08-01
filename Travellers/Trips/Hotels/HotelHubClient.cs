@@ -3,6 +3,11 @@ using System.Text.Json;
 
 namespace Travellers.Trips.Hotels;
 
+public interface IHotelHubClient
+{
+    Task<HotelReservation> GetReservationAsync(string hubReservationId, CancellationToken ct);
+}
+
 public class HotelHubClient(HttpClient httpClient) : IHotelHubClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);

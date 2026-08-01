@@ -1,3 +1,5 @@
+using Travellers.Trips.Hotels.GetHotelReservations;
+
 namespace Travellers.Trips.Hotels;
 
 public static class HotelReservationsModuleConfiguration

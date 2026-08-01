@@ -1,6 +1,7 @@
 using Travellers.Support.Db;
 using Travellers.Support.RateLimiting;
 using Travellers.Trips.Hotels;
+using Travellers.Trips.Hotels.GetHotelReservations;
 using Travellers.Users;
 using Travellers.Users.Create;
 

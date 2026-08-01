@@ -5,6 +5,7 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Travellers.Trips;
 using Travellers.Trips.Hotels;
+using Travellers.Trips.Hotels.GetHotelReservations;
 using TravellersTest.Support;
 
 namespace TravellersTest.Trips.Hotels;
