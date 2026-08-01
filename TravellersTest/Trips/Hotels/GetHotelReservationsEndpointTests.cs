@@ -29,15 +29,14 @@ public class GetHotelReservationsEndpointTests : DatabaseTest, IDisposable
         var tripId = Guid.NewGuid();
         var now = DateTimeOffset.UtcNow;
 
+        _fakeServer.AddReservation("HB-2026-001234", "Le Méridien Paris", new DateOnly(2026, 8, 15), new DateOnly(2026, 8, 18));
+        _fakeServer.AddReservation("HB-2026-005678", "Hotel Le Bristol Paris", new DateOnly(2026, 8, 19), new DateOnly(2026, 8, 22));
+
         DbContext.Set<TripRow>().Add(new TripRow { TripId = tripId, CreatedAt = now, UpdatedAt = now });
-        DbContext.Set<TripHotelReservationRow>().Add(new TripHotelReservationRow
-        {
-            TripHotelReservationId = Guid.NewGuid(),
-            TripId = tripId,
-            HubReservationId = "HB-2026-001234",
-            CreatedAt = now,
-            UpdatedAt = now
-        });
+        DbContext.Set<TripHotelReservationRow>().AddRange(
+            new TripHotelReservationRow { TripHotelReservationId = Guid.NewGuid(), TripId = tripId, HubReservationId = "HB-2026-001234", CreatedAt = now, UpdatedAt = now },
+            new TripHotelReservationRow { TripHotelReservationId = Guid.NewGuid(), TripId = tripId, HubReservationId = "HB-2026-005678", CreatedAt = now, UpdatedAt = now }
+        );
         await DbContext.SaveChangesAsync();
 
         var response = await CreateHttpClient().GetAsync($"/trips/{tripId}/reservations/hotels");
@@ -46,9 +45,10 @@ public class GetHotelReservationsEndpointTests : DatabaseTest, IDisposable
         using var _ = new AssertionScope();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body!.TripId.Should().Be(tripId);
-        body.Hotels.Should().HaveCount(1);
-        body.Hotels[0].HotelName.Should().Be("Le Méridien Paris");
-        body.Hotels[0].CheckIn.Should().Be(new DateOnly(2026, 8, 15));
-        body.Hotels[0].CheckOut.Should().Be(new DateOnly(2026, 8, 18));
+        body.Hotels.Should().BeEquivalentTo(new[]
+        {
+            new { HotelName = "Le Méridien Paris",      CheckIn = new DateOnly(2026, 8, 15), CheckOut = new DateOnly(2026, 8, 18) },
+            new { HotelName = "Hotel Le Bristol Paris", CheckIn = new DateOnly(2026, 8, 19), CheckOut = new DateOnly(2026, 8, 22) }
+        });
     }
 }
